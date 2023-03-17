@@ -1,0 +1,62 @@
+<!--This is an art project. We will just have a basic HTML file with a canvas. The canvas will be a grid of points. The points will be colored based on perlin noise, and shifted by perlin noise. Make the file now.-->
+<html>
+    <head>
+	<title>Perlin Noise</title>
+	<body>
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <script>
+            
+            
+            class Perlin{
+                constructor(){
+                    this.p = new Array(512);
+                    for(var i = 0; i < 512; i++){
+                        this.p[i] = Math.random();
+                    }
+                }
+                noise(x, y){
+                    var n = (x + y * 57) % 512;
+                    n = (n << 13) ^ n;
+                    return (1.0 - ((n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
+                }
+            }
+
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            var x = canvas.width/2;
+            var y = canvas.height/2;
+           //CREATE THE POINTS
+           let points = [];
+            for(var i = 0; i < canvas.width; i++){
+                for(var j = 0; j < canvas.height; j++){
+                    //get color
+                    var color = getColor(i,j);
+                    //draw point
+                    ctx.fillStyle = color;
+                    ctx.fillRect(i,j,1,1);
+                    points.push({x:i, y:j, color:color});
+                }
+            }
+            //GET THE COLOR
+            function getColor(){
+                var x = Math.random()*canvas.width;
+                var y = Math.random()*canvas.height;
+                var color = noise(x,y);
+                return color;
+            }
+            //NOISE
+            function noise(x,y){
+                var p = new Perlin();
+                var n = p.noise(x,y);
+                var color = "rgb("+n*255+","+n*255+","+n*255+")";
+                return color;
+            }
+            let time = 0;
+            function update(){
+                //animate by warping the points over time according to perlin noise
+                //for each point, move it by a certain amount
+            }
+            setInterval(update,10);
+        </script>
+    </body>
+</html>

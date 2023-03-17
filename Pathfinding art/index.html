@@ -1,0 +1,96 @@
+<html>
+    <body>
+        <canvas id="canvas"width="500px" height="500px" style="border: 5px solid black;"></canvas>
+        <script>
+            const canvas = document.getElementsByTagName("canvas")[0];
+            const ctx = canvas.getContext('2d');
+            const updateInterval = 1;
+            class PhysicsObject {
+                pos = {x:1,y:1};
+                speed = 0.001;
+                direction;
+                acceleration = {x:0,y:0};
+                width = 10;
+                height = 10;
+                color = "black";
+                constructor(pos, direction, acceleration, speed, color) {
+                    this.pos = pos;
+                    this.direction = direction;
+                    this.acceleration = acceleration;
+                    this.speed = speed;
+                    this.color = color;
+                }
+
+                draw() {
+                    //ctx.clearRect(0,0,canvas.width,canvas.height);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+                }
+
+                move() {
+                    this.pos.x+=(this.direction.x)*this.speed;
+                    this.pos.y+=(this.direction.y)*this.speed;
+                    
+                    this.accelerate();
+                    this.draw();
+                }
+
+                accelerate() {
+                    if(this.pos.x>canvas.width) {
+                        this.direction.x = -Math.abs(this.direction.x);
+                    } else if(this.pos.x<0) {
+                        this.direction.x = Math.abs(this.direction.x);
+                    }
+                    if(this.pos.y>canvas.height) {
+                        this.direction.y = -Math.abs(this.direction.y);
+                    } else if(this.pos.y<0) {
+                        this.direction.y = Math.abs(this.direction.y);
+                    }
+                    this.direction.x+=this.acceleration.x;
+                    this.direction.y+=this.acceleration.y;
+                }
+
+            }
+            class Bacteria extends PhysicsObject {
+                children = [];
+                constructor(pos, direction, acceleration, speed, color) {
+                    super(pos, direction, acceleration, speed, color);
+                    setTimeout(()=>{this.children.push(new Bacteria({x:(pos.x+0.1), y: (pos.y+0.1)}, direction, acceleration, speed, "black")); this.children.push(new Bacteria(pos, direction, acceleration, speed, color))}, 5000);
+                }
+                onUpdate() {
+                    this.move();
+                    this.children.forEach(child => {
+                        child.move();
+                    });
+                }
+            }
+   
+            function getDirectionToPos(pos, otherPos) {
+                let xDist = (otherPos.x-pos.x);
+                let yDist = (otherPos.y-pos.y);
+                let slope = yDist/xDist;
+                let reduced = reduce(Math.round(yDist), Math.round(xDist));
+                let direction = {x: reduced[1], y: reduced[0]};
+                return direction;
+            }
+            function reduce(numerator,denominator){
+                var gcd = function gcd(a,b){
+                    return b ? gcd(b, a%b) : a;
+                };
+                gcd = gcd(numerator,denominator);
+                return [(numerator/gcd), denominator/gcd];
+            }
+            //const neuron = new Neuron({x:0, y:0}, {x:0, y:0}, {x:0, y:0}, "black");
+            const planet = new Bacteria({x:0, y:0}, {x:2, y:1}, {x:0, y:0.01},10,"red", 0);
+            //planet2.width = 10;
+            setInterval(()=>{update()}, updateInterval);
+            function update() {
+                //ctx.clearRect(0,0,canvas.width,canvas.height);
+                planet.onUpdate();
+                
+            }
+
+
+        </script>
+    </body>
+</html>
